@@ -34,7 +34,7 @@ def prev_id(current_id, worker_num):
 # A subprocess use to capture frames.
 def capture(read_frame_list, Global, worker_num):
     # Get a reference to webcam #0 (the default one)
-    video_capture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture(3)
     # video_capture.set(3, 640)  # Width of the frames in the video stream.
     # video_capture.set(4, 480)  # Height of the frames in the video stream.
     # video_capture.set(5, 30) # Frame rate.

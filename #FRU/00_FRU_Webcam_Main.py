@@ -2,6 +2,8 @@ import face_recognition
 import cv2
 import numpy as np
 from datetime import datetime
+import os
+import logging
 
 
 #!! Facial Recognition for Universities (FRU)
@@ -36,6 +38,9 @@ from datetime import datetime
 #
 late_after_time = 5 # by minutes
 
+#! Check the number by checking available `video` in `/dev/videoX` where X is the number
+camera_number = 2 # 0 for default webcam, 1-N for external webcams
+
 
 
 
@@ -63,7 +68,7 @@ current_app_time = now = datetime.now()
 
 #! Ghangeable based on the external camera I use since my default webcam (laptop's) is broken
 #! Check the number by checking available `video` in `/dev/videoX` where X is the number
-video_capture = cv2.VideoCapture(1)
+video_capture = cv2.VideoCapture(camera_number)
 
 # Create arrays of known face encodings and their names
 known_face_encodings = []
@@ -76,8 +81,8 @@ def addKnownFace(file_name, person_name):
     known_face_encodings.append(face_encoding)
     known_face_names.append(person_name)
 
-
-known_faces_folder_path = "./known_people/"
+parent_path = os.path.dirname(os.path.abspath(__file__))
+known_faces_folder_path = parent_path + "/known_people/"
 
 # Add faces here
 addKnownFace(known_faces_folder_path + "Ayham.jpg", "Ayham")
@@ -85,12 +90,15 @@ addKnownFace(known_faces_folder_path + "Fahad.jpg", "Fahad")
 addKnownFace(known_faces_folder_path + "Miar.jpg", "Miar")
 addKnownFace(known_faces_folder_path + "Ammar.jpg", "Ammar")
 addKnownFace(known_faces_folder_path + "Zaid.jpg", "Zaid")
-addKnownFace(known_faces_folder_path + "Zaid-Ali.png", "Zaid-Ali")
-addKnownFace(known_faces_folder_path + "Batool.png", "Batool")
-addKnownFace(known_faces_folder_path + "Saif.png", "Saif")
+addKnownFace(known_faces_folder_path + "Ali.jpg", "Ali")
+
+
+def hasBeenDetected(name):
+    return name.__contains__(", detected: true")
 
 
 # Initialize some variables
+logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 face_locations = []
 face_encodings = []
 face_names = []
@@ -117,8 +125,8 @@ while True:
         face_names = []
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-            name = "0x0" # ;)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, .6)
+            original_name = "0x0" # ;)
 
             # # If a match was found in known_face_encodings, just use the first one.
             # if True in matches:
@@ -129,19 +137,28 @@ while True:
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
-                name = known_face_names[best_match_index]
+                original_name = known_face_names[best_match_index]
 
             # if (datetime.now() - current_app_time).total_seconds() > late_after_time * 60:
             #     face_status.append("Late")
             # else:
             #     face_status.append("Present")
 
-            if (datetime.now() - current_app_time).total_seconds() > late_after_time * 60:
+            name = original_name
+            if original_name != "0x0" and (datetime.now() - current_app_time).total_seconds() > late_after_time * 60:
                 name += ", s: Late"
-            elif name != "0x0":
-                name += ", s: Present"
+                # name = name + "50" # Ali -> Ali50
+            elif original_name != "0x0":
+                name += ", s: Present" # 'Ayham' -> 'Ayham, s: Present'
             else:
                 name += ", s: 0x0"
+
+            # if hasBeenDetected(original_name):
+            #     name += ", s: Present"
+            # elif name != "0x0":
+            #     name += ", s: Late"
+            # else:
+            #     name += ", s: 0x0"
 
             face_names.append(name)
 
