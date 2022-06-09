@@ -91,6 +91,7 @@ addKnownFace(known_faces_folder_path + "Miar.jpg", "Miar")
 addKnownFace(known_faces_folder_path + "Ammar.jpg", "Ammar")
 addKnownFace(known_faces_folder_path + "Zaid.jpg", "Zaid")
 addKnownFace(known_faces_folder_path + "Ali.jpg", "Ali")
+addKnownFace(known_faces_folder_path + "Dr. Bassam.jpg", "Dr. Bassam")
 
 
 def hasBeenDetected(name):
